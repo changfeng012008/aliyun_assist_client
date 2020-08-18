@@ -38,6 +38,7 @@ clean() {
 create_link() {
     ln -sf /usr/local/share/aliyun-assist/$assist_version/aliyun-service /usr/sbin/aliyun-service
     ln -sf /usr/local/share/aliyun-assist/$assist_version/aliyun_installer /usr/sbin/aliyun_installer
+    ln -sf /usr/local/share/aliyun-assist/$assist_version/acs-plugin-manager /usr/sbin/acs-plugin-manager
 }
 
 stop_service() {
@@ -121,10 +122,41 @@ start_service() {
     fi
 }
 
+
+install_assist_daemon(){
+	data_dir="/usr/local/share/aliyun-assist/$assist_version"
+	
+	if [ -e $data_dir/assist_daemon ];
+	then 
+		echo "need to install assist_daemon"
+	else
+		echo "no need to install assist_daemon"
+		return
+	fi
+	
+	if [ -e /usr/local/share/assist-daemon/assist_daemon ]; then
+		/usr/local/share/assist-daemon/assist_daemon --stop
+		/usr/local/share/assist-daemon/assist_daemon --delete
+		rm -rf /usr/local/share/assist-daemon/assist_daemon
+	fi
+	
+	if [ -d /usr/local/share/assist-daemon ];
+	then 
+		echo "assist-daemon exist"
+	else
+		mkdir /usr/local/share/assist-daemon
+	fi
+	 
+	cp -f $data_dir/assist_daemon /usr/local/share/assist-daemon/assist_daemon
+	chmod a+x /usr/local/share/assist-daemon/assist_daemon
+	/usr/local/share/assist-daemon/assist_daemon --create
+	/usr/local/share/assist-daemon/assist_daemon --start
+}
+
 clean
 create_link
 stop_service
 start_service
-
+install_assist_daemon
 
 #echo "0:success"

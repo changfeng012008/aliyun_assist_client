@@ -21,20 +21,9 @@
 
 namespace task_engine {
 
-	
-struct Timer {
-	time_t         time;
-	Callback	   notifier;
-	void*          context;
-	cron_expr*	   expr;
-	int            interval;
-};
-
 bool comprator(Timer* a, Timer* b) {
 	return a->time > b->time;
 }
-
-
 
 TimerManager::TimerManager() {
   m_stop = false;
@@ -44,7 +33,13 @@ TimerManager::TimerManager() {
 #endif
 }
 
-	
+TimerManager::~TimerManager() {
+#if !defined(_WIN32)
+	pthread_mutex_destroy(&mutex);
+	pthread_cond_destroy(&cond);
+#endif
+}
+
 bool  TimerManager::start() {
 	
 #ifdef _WIN32

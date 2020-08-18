@@ -21,6 +21,7 @@ Description: Provide functions to get file path
 #include "FileUtil.h"
 #include "AssistPath.h"
 #include <string.h>
+#include "utils/Log.h"
 
 
 
@@ -217,6 +218,38 @@ string AssistPath::GetCommonPath(string filedirname) {
   return path;
 }
 
+string AssistPath::GetPluginPath() {
+  string path = _root_path + FileUtils::separator() + ".." + FileUtils::separator() +"plugin";
+  MakeSurePath(path);
+  return path;
+}
+
+string AssistPath::GetScriptPath() {
+  MakeSurePath(_root_path + FileUtils::separator() + ".." + FileUtils::separator() + "work");
+  string path = _root_path + FileUtils::separator() + ".." + FileUtils::separator() +"work" + FileUtils::separator() + "script";
+  MakeSurePath(path);
+  return path;
+}
+
+#if defined _WIN32
+bool AssistPath::SetCurrentEnvPath()  
+{  
+  char chBuf[4096];
+ 
+   DWORD dwSize =GetEnvironmentVariableA("PATH", chBuf, 4096);
+   if(dwSize > 4096) {
+     return false;
+   }
+
+   int error = GetLastError();
+   std::string strEnvPaths(chBuf);  
+
+   strEnvPaths += ";" + _root_path;
+   Log::Info("set env:%s",strEnvPaths.c_str());
+   bool bRet = SetEnvironmentVariableA("Path",strEnvPaths.c_str());  
+   return bRet;  
+}
+#endif
 /*
 *Summary: to make sure path
 *Parameters: (string) filename

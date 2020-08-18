@@ -253,3 +253,24 @@ bool HttpRequest::download_file(const std::string& url,
   return res == CURLE_OK;
 }
 
+bool HttpRequest::url_encode(const std::string& str, std::string& result) {
+    if (str.length() == 0) {
+        return 1; // empty str encode return success
+    }
+    CURL * curl = curl_easy_init();
+    bool success = 0;
+    if (curl) {
+        char * output = curl_easy_escape(curl, str.c_str(), str.length());
+        if (output) {
+            result = std::string(output);
+            curl_free(output);
+            success = 1;
+        }
+        curl_easy_cleanup(curl);
+    }
+    if (success == 0) {
+        Log::Error("url_encode() failed, encode str: %s", str.c_str());
+    }
+    return success;
+}
+

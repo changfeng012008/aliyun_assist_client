@@ -234,25 +234,11 @@ void Log::copyFile(const char* src, const char* dest) {
   std::ifstream inputFile(src, std::ios::binary);
   std::ofstream outputFile(dest, std::ios::binary | std::ios::trunc);
 
-  if (!inputFile.good()) {
-    Log::Error("copy file failed");
-  }
-  if (!outputFile.good()) {
-    Log::Error("copy file failed");
-  }
 
   outputFile << inputFile.rdbuf();
 
-  if (inputFile.bad()) {
-    Log::Error("copy file failed");
-  }
-  if (outputFile.bad()) {
-    Log::Error("copy file failed");
-  }
 #else
-  if (!CopyFileA(src, dest, FALSE)) {
-    Log::Error("copy file failed");
-  }
+  CopyFileA(src, dest, FALSE);
 #endif
 }
 

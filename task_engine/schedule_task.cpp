@@ -25,6 +25,7 @@
 #else
 #include <windows.h>
 #endif
+#include "sendfile.h"
 
 namespace task_engine {
 
@@ -191,8 +192,10 @@ void TaskSchedule::DispatchTask(BaseTask* task) {
 int TaskSchedule::FetchTasks(std::string reason) {
   std::vector<StopTaskInfo> stop_tasks;
   std::vector<RunTaskInfo> run_tasks;
+  std::vector<SendFile> sendfile_tasks;
   task_engine::TaskFetch task_fetch;
-  task_fetch.FetchTaskList(stop_tasks, run_tasks, reason);
+
+  task_fetch.FetchTaskList(stop_tasks, run_tasks, sendfile_tasks, reason);
 
   for (size_t i = 0; i < run_tasks.size(); i++) {
     Schedule(run_tasks[i]);
@@ -202,7 +205,10 @@ int TaskSchedule::FetchTasks(std::string reason) {
     Cancel(stop_tasks[i]);
   }
 
-  return run_tasks.size() + stop_tasks.size();
+  for (size_t i = 0; i < sendfile_tasks.size(); i++) {
+	  doSendFile(sendfile_tasks[i]);
+  }
+  return run_tasks.size() + stop_tasks.size() + sendfile_tasks.size();
 }
 
 }  // namespace task_engine

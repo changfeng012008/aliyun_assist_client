@@ -25,6 +25,7 @@
 #include "utils/service_provide.h"
 #include "utils/TimeTool.h"
 #include "utils/http_request.h"
+#include "utils/ProcessSingleton.h"
 #include "plugin/debug_script.h"
 #include "timer_manager.h"
 
@@ -38,7 +39,7 @@ extern function<void(char*)>    wskt_callback;
  
 #define PING_INTERVAL_SECONDS_MIN 30
 
- 
+#define PROCESS_SINGLETON_IDENTIFIER "aliyun-service"
 
 void ServiceApp::runService() {
     start();
@@ -52,6 +53,16 @@ void ServiceApp::runCommon() {
 /*Create the Deamon Service*/
 int ServiceApp::becomeDeamon()
 {
+  ProcessSingleton::Lock runningAgentDetector(PROCESS_SINGLETON_IDENTIFIER);
+  if (!runningAgentDetector.tryLock()) {
+    Log::Error("Agent has been running with pid %s",
+      ProcessSingleton::PidHolder::getRunningPid(PROCESS_SINGLETON_IDENTIFIER).c_str());
+    // Immediate exiting looks not so graceful.
+    exit(EXIT_FAILURE);
+    return EXIT_FAILURE;
+  }
+  runningAgentDetector.unlock();
+
 	pid_t pid, sid;
 	int i = 0;
 	struct sigaction sigActionMask;
@@ -89,6 +100,20 @@ int ServiceApp::becomeDeamon()
 
 
 void  ServiceApp::start() {
+  ProcessSingleton::Lock agentLock(PROCESS_SINGLETON_IDENTIFIER);
+  if (!agentLock.tryLock()) {
+    Log::Error("Agent has been running with pid: %s",
+      ProcessSingleton::PidHolder::getRunningPid(PROCESS_SINGLETON_IDENTIFIER).c_str());
+    return;
+  }
+  ProcessSingleton::PidHolder agentPidHolder(PROCESS_SINGLETON_IDENTIFIER);
+  if (!agentPidHolder.tryHold()) {
+    Log::Error("Failed to save pid of current service to %s", agentPidHolder.getHolderPath().c_str());
+    return;
+  }
+  // Cleaning of process lock and pidfile during normal exiting is guaranteed by RAII.
+  // Releasing process lock during abnormal exiting is promised by system, and
+  // pidfile may be left on disk.
 
   //signal(SIGCHLD, sig_fork);
   /* Change the current working directory */

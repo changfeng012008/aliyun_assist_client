@@ -59,15 +59,15 @@ clean() {
 
 clean
 
-install_assist_daemon(){
+uninstall_assist_daemon(){
 	assist_version=$(cat /usr/local/share/aliyun-assist/version)
 	data_dir="/usr/local/share/aliyun-assist/$assist_version"
 	
 	if [ -e $data_dir/assist_daemon ];
 	then 
-		echo "need to install assist_daemon"
+		echo "need to remove assist_daemon"
 	else
-		echo "no need to install assist_daemon"
+		echo "no need to remove assist_daemon"
 		return
 	fi
 	
@@ -76,21 +76,9 @@ install_assist_daemon(){
 		/usr/local/share/assist-daemon/assist_daemon --delete
 		rm -rf /usr/local/share/assist-daemon/assist_daemon
 	fi
-	
-	if [ -d /usr/local/share/assist-daemon ];
-	then 
-		echo "assist-daemon exist"
-	else
-		mkdir /usr/local/share/assist-daemon
-	fi
-	 
-	cp -f $data_dir/assist_daemon /usr/local/share/assist-daemon/assist_daemon
-	chmod a+x /usr/local/share/assist-daemon/assist_daemon
-	/usr/local/share/assist-daemon/assist_daemon --create
-	/usr/local/share/assist-daemon/assist_daemon --start
 }
 
-install_assist_daemon
+uninstall_assist_daemon
 
 if [ -e /usr/sbin/aliyun-service ]; then
     if [ -e $FILE ]; then

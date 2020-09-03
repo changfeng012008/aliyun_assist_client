@@ -91,6 +91,7 @@ bool HttpRequest::http_request(const std::string& url,
     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 3);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5);
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+	curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
     /* Now specify the POST data */
     if(is_post) {
       curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_content.c_str());
@@ -152,6 +153,7 @@ bool HttpRequest::https_request(const std::string& url,
     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 3);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5);
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+	curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
     /* Now specify the POST data */
     if(is_post) {
       curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_content.c_str());

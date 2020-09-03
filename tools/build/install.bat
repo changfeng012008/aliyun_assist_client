@@ -2,6 +2,8 @@ set root_dir=%~dp0
 
 set service_path=%root_dir%aliyun_assist_service.exe
 
+IF EXIST %root_dir%version.ini copy /V /Y %root_dir%version.ini %root_dir%..\config.ini
+
 SC QUERY "AliyunService" > NUL
 IF ERRORLEVEL 1060 GOTO NOTEXIST
 GOTO EXIST

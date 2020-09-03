@@ -24,6 +24,39 @@
 
 namespace {
 
+void ParseSendFileInfo(json11::Json json,
+	std::vector<task_engine::SendFile>& send_file_info)
+{
+	try {
+		for (auto &it : json.array_items()) {
+			task_engine::SendFile info;
+
+			auto taskjson = it["task"];
+			if (taskjson.is_null()) {
+				Log::Error("sendfile task json is null");
+				continue;
+			}
+
+			info.name = taskjson["name"].string_value();
+			//info.contentType = taskjson["contentType"].string_value();
+			info.content = taskjson["content"].string_value();
+			info.signature = taskjson["signature"].string_value();
+			info.invokeId = taskjson["taskID"].string_value();
+			info.timeout = taskjson["timeout"].string_value();
+			info.destination = taskjson["destination"].string_value();
+			info.fileType = taskjson["fileType"].string_value();
+			info.owner = taskjson["owner"].string_value();
+			info.group = taskjson["group"].string_value();
+			info.mode = taskjson["mode"].string_value();
+			info.overwrite = taskjson["overwrite"].bool_value();
+			send_file_info.push_back(info);
+		}
+	}
+	catch (...) {
+		Log::Error("sendfile task list json is invalid");
+	}
+}
+
 void ParseStopTaskInfo(json11::Json json,
   std::vector<task_engine::StopTaskInfo>& stop_task_info)
 {
@@ -148,7 +181,8 @@ void ParseRunTaskInfo(json11::Json json,
 
 void ParseTaskInfo(std::string response,
   std::vector<task_engine::StopTaskInfo>& stop_task_info,
-  std::vector<task_engine::RunTaskInfo>& run_task_info) {
+  std::vector<task_engine::RunTaskInfo>& run_task_info,
+  std::vector<task_engine::SendFile>& send_file_info) {
 
   try {
     string errinfo;
@@ -160,6 +194,7 @@ void ParseTaskInfo(std::string response,
 
     ParseStopTaskInfo(json["stop"], stop_task_info);
     ParseRunTaskInfo(json["run"], run_task_info);
+	ParseSendFileInfo(json["file"], send_file_info);
   }
   catch (...) {
     Log::Error("Task list json is invalid");
@@ -179,6 +214,7 @@ void TaskFetch::TestFetchTasks(std::string res, std::vector<TaskInfo>& task_info
 
 void TaskFetch::FetchTaskList(std::vector<task_engine::StopTaskInfo>& stop_task_info,
     std::vector<task_engine::RunTaskInfo>& run_task_info,
+	std::vector<task_engine::SendFile>& sendfile_task_info,
     std::string reason) {
 
   if (HostFinder::getServerHost().empty()) {
@@ -212,7 +248,7 @@ void TaskFetch::FetchTaskList(std::vector<task_engine::StopTaskInfo>& stop_task_
 
 
   Log::Info("fetch-task response %s", response.c_str());
-  ParseTaskInfo(response, stop_task_info, run_task_info);
+  ParseTaskInfo(response, stop_task_info, run_task_info, sendfile_task_info);
 }
 
 }  // namespace task_engine

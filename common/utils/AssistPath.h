@@ -31,8 +31,10 @@ class AssistPath {
   string GetSetupPath(string subpath = "");
   string GetBackupPath(string subpath = "");
   string GetPluginPath();
+  string GetCrossVersionWorkPath();
   string GetScriptPath();
   bool   MakeSurePath(string path);
+  int CreateDirRecursive(const std::string &directoryPath);
 #if defined _WIN32
   bool SetCurrentEnvPath();
 #endif
